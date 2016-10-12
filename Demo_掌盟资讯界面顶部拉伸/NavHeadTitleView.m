@@ -38,6 +38,7 @@
         self.rightBtn.backgroundColor = [UIColor clearColor];
         self.rightBtn.frame = CGRectMake(self.frame.size.width-46, 30, 30, 30);
         [self.rightBtn addTarget:self action:@selector(rightBtnClick) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:self.rightBtn];
     }
     return self;
 }

@@ -8,10 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface HeadImageView : UIView
-
-@property(nonatomic,strong) NSString *imgURL;
-@property(nonatomic,strong) NSString *name;
-@property(nonatomic,strong) NSString *content;
+@interface HeadImageView : UIScrollView
 
 @end

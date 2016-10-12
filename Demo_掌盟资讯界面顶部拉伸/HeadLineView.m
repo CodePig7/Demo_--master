@@ -56,7 +56,7 @@
                 currentSelectedBtn = labViewBtn;
             }else{
                 if (labViewBtn.tag == 0) {
-                    //绿线
+                    //灰线
                     label1.backgroundColor = kColor(238, 238, 238, 1);
                 }else if (labViewBtn.tag == 1){
                     label2.backgroundColor = kColor(238, 238, 238, 1);
@@ -81,8 +81,8 @@
 }
 
 //传入顶部的title
-- (void)setTitleArr:(NSArray *)titleArr{
-    _titleArray = titleArr;
+- (void)setTitleArray:(NSArray *)titleArray{
+    _titleArray = titleArray;
     UIButton *btn = NULL;
     CGFloat width = kWIDTH/_titleArray.count;
     for (int i=0; i<_titleArray.count; i++) {
@@ -97,24 +97,25 @@
         [btn setUserInteractionEnabled:YES];
         [btn addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
         [buttonArray addObject:btn];
+        [self addSubview:btn];
         if (i == 0) {
             currentSelectedBtn = btn;
-            //深绿线
+            //绿线
             label1 = [[UILabel alloc]initWithFrame:CGRectMake(0, 45.5, kWIDTH/3, 2.5)];
             label1.backgroundColor = kColor(179, 211, 85, 1);
             [self addSubview:label1];
         }else if (i == 1){
-            //绿线
+            //灰线
             label2 = [[UILabel alloc]initWithFrame:CGRectMake(width, 45.5, kWIDTH/3, 2.5)];
             label2.backgroundColor = kColor(238, 238, 238, 1);
             [self addSubview:label2];
         }else{
-            //绿线
+            //灰线
             label3 = [[UILabel alloc]initWithFrame:CGRectMake(width *2, 45.5, kWIDTH/3, 2.5)];
             label3.backgroundColor = kColor(238, 238, 238, 1);
             [self addSubview:label3];
         }
     }
-}
 
+}
 @end

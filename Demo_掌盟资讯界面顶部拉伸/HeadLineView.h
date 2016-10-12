@@ -10,6 +10,7 @@
 
 @protocol headLineDelegate <NSObject>
 
+@optional
 - (void)refreshHeadLine:(NSInteger)currentIndex;
 
 @end

@@ -39,6 +39,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+    [self topScrollView];
+    [self createNav];
+    [self loadData];
+    [self createTableView];
 }
 
 //创建数据源
@@ -70,7 +74,7 @@
 //顶部滚动视图
 - (void)topScrollView{
     UIScrollView *topScrollView = [[UIScrollView alloc]initWithFrame:CGRectMake(0, 0, kWIDTH, kHEIGHT*0.3)];
-    [self.view addSubview:topScrollView];
+    [self.headImageView addSubview:topScrollView];
     topScrollView.backgroundColor = [UIColor clearColor];
     //设置水平滚动条不可见
     topScrollView.showsHorizontalScrollIndicator = NO;
@@ -84,14 +88,14 @@
     //向滚动视图内添加子视图
     for (NSInteger i=0; i<IMAGECOUNT; i++) {
         UIImageView *imageView = [[UIImageView alloc]init];
-        [imageView setImage:[UIImage imageNamed:[NSString stringWithFormat:@"IMG_275%d",i]]];
+        [imageView setImage:[UIImage imageNamed:[NSString stringWithFormat:@"IMG_275%ld.JPG",i+1]]];
         imageView.frame = CGRectMake(i*topScrollView.frame.size.width, 0, topScrollView.frame.size.width, topScrollView.frame.size.height);
         [topScrollView addSubview:imageView];
     }
     
     UIPageControl *pageControl = [[UIPageControl alloc]init];
     self.pageControl = pageControl;
-    pageControl.frame = CGRectMake(0,topScrollView.frame.size.height-60, topScrollView.frame.size.width, 40);
+    pageControl.frame = CGRectMake(0,topScrollView.frame.size.height-30, topScrollView.frame.size.width, 40);
     //设置圆点没有选中时的颜色
     pageControl.pageIndicatorTintColor = [UIColor whiteColor];
     //设置圆点选中时的颜色
@@ -102,7 +106,7 @@
     pageControl.userInteractionEnabled = NO;
     
     //将分页控件添加至self.view中
-    [self.view addSubview:pageControl];
+    [self.headImageView addSubview:pageControl];
     
 }
 
@@ -114,6 +118,43 @@
     
     //将这个整数倍作为选中的小圆点的下标
     self.pageControl.currentPage = round(i);
+    
+    int contentOffsety = scrollView.contentOffset.y;
+    
+    if (scrollView.contentOffset.y<=170) {
+        self.NavView.headBgView.alpha=scrollView.contentOffset.y/170;
+        self.NavView.backTitleImage=@"Mail";
+        self.NavView.rightImageView=@"Setting";
+        self.NavView.color=[UIColor whiteColor];
+        //状态栏字体白色
+        [UIApplication sharedApplication].statusBarStyle=UIStatusBarStyleLightContent;
+    }else{
+        self.NavView.headBgView.alpha=1;
+        //self.NavView.title
+        self.NavView.backTitleImage=@"Mail-click";
+        self.NavView.rightImageView=@"Setting-click";
+        self.NavView.color=kColor(87, 173, 104, 1);
+        //隐藏黑线
+        [self.navigationController.navigationBar setShadowImage:[UIImage new]];
+        //状态栏字体黑色
+        [UIApplication sharedApplication].statusBarStyle=UIStatusBarStyleDefault;
+    }
+    if (contentOffsety<0) {
+        CGRect rect = _backgroundImgV.frame;
+        rect.size.height = _backImgHeight-contentOffsety;
+        rect.size.width = _backImgWidth* (_backImgHeight-contentOffsety)/_backImgHeight;
+        rect.origin.x =  -(rect.size.width-_backImgWidth)/2;
+        rect.origin.y = 0;
+        _backgroundImgV.frame = rect;
+    }else{
+        CGRect rect = _backgroundImgV.frame;
+        rect.size.height = _backImgHeight;
+        rect.size.width = _backImgWidth;
+        rect.origin.x = 0;
+        rect.origin.y = -contentOffsety;
+        _backgroundImgV.frame = rect;
+        
+    }
 }
 
 //创建TableView
@@ -154,6 +195,18 @@
     _currentIndex = currentIndex;
     [_tableView reloadData];
 }
+
+//头视图
+-(HeadImageView *)headImageView{
+    if (!_headImageView) {
+        _headImageView=[[HeadImageView alloc]init];
+        _headImageView.frame=CGRectMake(0, 64, kWIDTH, 170);
+        _headImageView.backgroundColor=[UIColor clearColor];
+    }
+    return _headImageView;
+}
+
+
 -(void)createNav{
     self.NavView=[[NavHeadTitleView alloc]initWithFrame:CGRectMake(0, 0, kWIDTH, 64)];
     self.NavView.title=@"个人中心";
@@ -173,13 +226,76 @@
 }
 
 #pragma mark - UITableViewDelegate
-- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
     return 48;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     return 120;
 }
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    if (_currentIndex == 0) {
+        return dataArr0.count;
+    }else if (_currentIndex == 1){
+        return dataArr1.count;
+    }else{
+        return dataArr2.count;
+    }
+    return 0;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    if (!_headLineView) {
+        _headLineView = [[HeadLineView alloc]init];
+        _headLineView.frame = CGRectMake(0, 0, kWIDTH, 48);
+        _headLineView.delegate = self;
+        [_headLineView setTitleArray:@[@"最新",@"娱乐",@"活动"]];
+    }
+    return _headLineView;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    static NSString *reuseID = @"Cell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseID];
+    if (!cell) {
+        cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:reuseID];
+    }
+    if (_currentIndex == 0) {
+        cell.textLabel.text = [dataArr0 objectAtIndex:indexPath.row];
+        
+        cell.detailTextLabel.text = [dataArr0 objectAtIndex:indexPath.row];
+        [cell.imageView setImage:[UIImage imageNamed:@"fullplayer_share_qq@3x"]];
+        return cell;
+    }else if(_currentIndex==1){
+        cell.textLabel.text=[dataArr1 objectAtIndex:indexPath.row];
+        
+        cell.detailTextLabel.text=[dataArr1 objectAtIndex:indexPath.row];
+        
+        [cell.imageView setImage:[UIImage imageNamed:@"fullplayer_share_qzone@3x"]];
+        
+        return cell;
+    }else if(_currentIndex==2){
+        cell.textLabel.text=[dataArr2 objectAtIndex:indexPath.row];
+        
+        cell.detailTextLabel.text=[dataArr2 objectAtIndex:indexPath.row];
+        
+        [cell.imageView setImage:[UIImage imageNamed:@"fullplayer_share_sina@3x"]];
+        
+        return cell;
+    }
+    
+    return nil;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if (_currentIndex==0) {
+    }else if (_currentIndex==1){
+    }else{
+    }
+}
+
 
 
 
